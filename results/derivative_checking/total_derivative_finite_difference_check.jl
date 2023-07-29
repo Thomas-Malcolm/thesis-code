@@ -2,11 +2,7 @@ using Bessels
 using Roots
 using Plots
 # using PlotlyJS
-using Optim
-using LineSearches
-# using JuMP
-# using Ipopt
-# using NLopt
+
 
 x0 = 5.0
 ρ = 1.0
