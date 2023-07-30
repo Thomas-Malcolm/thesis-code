@@ -1,4 +1,4 @@
-module ACSimulation
+# module ACSimulation
 
 using Bessels
 using Roots
@@ -113,6 +113,14 @@ struct Data
             d_vec
         )
     end
+end
+
+function -(ds::Data)
+    Data(
+        [
+            (d.x, -d.val) for d in ds.d
+        ]
+    )
 end
 
 function initial_calculations(cfg::Config)
@@ -525,4 +533,4 @@ end
 
 
 
-end # Module end
+# end # Module end
