@@ -12,8 +12,12 @@ export initial_calculations
 export auns_for_params
 
 export magnetic_field_for_params
+export magnetic_field_inner_iterate
+export ψ
+
 export current_profile_for_params_unnormalised_x
 export current_profile_for_params_unnormalised
+export current_profile_for_params_normalised_x
 export current_profile_for_params_normalised
 
 export pressure_profile_for_params_unnormalised_x
@@ -221,6 +225,8 @@ function magnetic_field_inner_iterate(xx::Float64, zz::Float64, cfg::Config, par
     inner_iterate(xx, zz)
 end
 
+ψ(xx::Float64, zz::Float64, cfg::Config, params::Parameters) = magnetic_field_inner_iterate(xx, zz, cfg, params)
+
 function magnetic_field_for_params(cfg::Config, params::Parameters)
     x_range = cfg.x_range
     z_range = cfg.z_range
@@ -268,10 +274,17 @@ function current_profile_for_params_unnormalised(cfg::Config, params::Parameters
     [ current_profile_for_params_unnormalised_x(xx, cfg, params) for xx in x_range ]
 end
 
+function current_profile_for_params_normalised_x(xx::Float64, cfg::Config, params::Parameters)
+
+    M = maximum_current_for_params(cfg, params)
+
+    current_profile_for_params_unnormalised_x(xx, cfg, params) / M
+end
+
 function current_profile_for_params_normalised(cfg::Config, params::Parameters)
     curr_vals = current_profile_for_params_unnormalised(cfg, params)
 
-    M = maximum(abs.(curr_vals))
+    M = maximum_current_for_params(cfg, params)
 
     curr_vals / M
 end
@@ -329,6 +342,7 @@ function CurrentDa1(xx::Float64, cfg::Config, params::Parameters)
     adns = cfg.adns
 
     x0 = cfg.x0
+    k = cfg.k
     N = cfg.N
 
     tmpVal(n) = (1/μns[n]) * (
@@ -369,6 +383,7 @@ function CurrentDa2(xx::Float64, cfg::Config, params::Parameters)
     adns = cfg.adns
 
     x0 = cfg.x0
+    k = cfg.k
     N = cfg.N
 
     tmpVal(n) = (1/μns[n]) * (
@@ -380,8 +395,6 @@ function CurrentDa2(xx::Float64, cfg::Config, params::Parameters)
             cns[n] * besselj0(μns[n] * (x0 - 1)) + bessely0(μns[n] * (x0 - 1))
         )
     )
-
-    adns = [ (edn(x0 + 1, n) - edn(x0 - 1, n)) for n in 1:N ]
 
     (1/xx) + α^2 * sum(
         sum(
@@ -413,9 +426,10 @@ function CurrentDalpha(xx::Float64, cfg::Config, params::Parameters)
     adns = cfg.adns
     auns = auns_for_params(cfg, params)
 
-    N = cfg.N    
+    N = cfg.N
+    k = cfg.k
 
-    part1 = 2 * α * (1/xx) * ψ(a1,a2,α,xx,0)
+    part1 = 2 * α * (1/xx) * ψ(xx, 0.0, cfg, params)
 
     part2 = α^2 * sum(
         sum(
@@ -450,7 +464,7 @@ Calculates the total residual squared value from a set of data points.
 """
 function residuals(cfg::Config, params::Parameters, ds::Data)
 
-    sum(residual(cfg, params, d) for d in ds)
+    sum(residual(cfg, params, d) for d in ds.d)
 end
 
 ## Residual Derivatives
@@ -467,7 +481,7 @@ function residualDa1(cfg::Config, params::Parameters, ds::Data)
         (-2 / M) * (
             d.val - (1/M) * current_profile_for_params_unnormalised_x(d.x, cfg, params)
         ) * CurrentDa1(d.x, cfg, params)
-        for d in ds
+        for d in ds.d
     )
 end
 
@@ -482,7 +496,7 @@ function residualDa2(cfg::Config, params::Parameters, ds::Data)
         (-2 / M) * (
             d.val - (1/M) * current_profile_for_params_unnormalised_x(d.x, cfg, params)
         ) * CurrentDa2(d.x, cfg, params)
-        for d in ds
+        for d in ds.d
     )
 end
 
@@ -497,7 +511,7 @@ function residualDalpha(cfg::Config, params::Parameters, ds::Data)
         (-2 / M) * (
             d.val - (1/M) * current_profile_for_params_unnormalised_x(d.x, cfg, params)
         ) * CurrentDalpha(d.x, cfg, params)
-        for d in ds
+        for d in ds.d
     )
 end
 
