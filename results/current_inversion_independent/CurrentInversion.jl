@@ -24,17 +24,13 @@ function smoothly_invert(curr::Vector{Float64}, h::Int = 200)
         newCurrent::Vector{Float64} = Vector{Float64}()
 
         for j in 1:length(curr)
-            if curr[j] > 0
-                push!(
-                    newCurrent,
-                    curr[j] - (abs(targetCurrent[j] - curr[j]) / h) * i
-                )
-            else
-                push!(
-                    newCurrent,
-                    curr[j] + (abs(targetCurrent[j] - curr[j]) / h) * i
-                )
-            end
+
+            sign = curr[j] / abs(curr[j])
+
+            push!(
+                newCurrent,
+                curr[j] - sign * (abs(targetCurrent[j] - curr[j]) / h) * i
+            )
         end
 
         p = scatter(
@@ -51,7 +47,7 @@ function smoothly_invert(curr::Vector{Float64}, h::Int = 200)
         frame(a)
     end
 
-    gif(a, "current-inversion.gif"; fps = 30)
+    gif(a, "current-inversion-new.gif"; fps = 30)
 end
 
 curr_vals = current_profile_for_params_normalised(cfg, params)

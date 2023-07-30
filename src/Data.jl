@@ -21,6 +21,10 @@ struct Data
             d_vec
         )
     end
+
+    function Data()
+        new([])
+    end
 end
 
 function -(ds::Data)
@@ -29,4 +33,8 @@ function -(ds::Data)
             (d.x, -d.val) for d in ds.d
         ]
     )
+end
+
+function push!(ds::Data, d::Datum)
+    push!(ds.d, d)
 end
