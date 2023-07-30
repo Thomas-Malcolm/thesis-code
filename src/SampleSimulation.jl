@@ -1,5 +1,4 @@
-include("./ACSimulation.jl")
-using .ACSimulation
+include("ACSimulation.jl")
 using Plots
 
 
