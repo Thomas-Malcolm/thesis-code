@@ -472,7 +472,7 @@ Calculates the total residual squared value from a set of data points.
 """
 function residuals(cfg::Config, params::Parameters, ds::Data)
 
-    sum(residual(cfg, params, d) for d in ds.d)
+    sum(residual(cfg, params, d)^2 for d in ds.d)
 end
 
 ## Residual Derivatives
