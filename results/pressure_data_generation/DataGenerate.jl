@@ -1,5 +1,4 @@
 include("../../src/ACSimulation.jl")
-using .ACSimulation
 
 """
 This will generate `data_size` randomly selected data points 

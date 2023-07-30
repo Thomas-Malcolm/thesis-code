@@ -1,5 +1,4 @@
 include("../../src/ACSimulation.jl")
-using .ACSimulation
 using Plots
 
 using JuMP
