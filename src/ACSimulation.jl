@@ -22,6 +22,7 @@ export current_profile_for_params_normalised
 
 export pressure_profile_for_params_unnormalised_x
 export pressure_profile_for_params_unnormalised
+export pressure_profile_for_params_normalised_x
 export pressure_profile_for_params_normalised
 
 export CurrentDa1
@@ -315,13 +316,20 @@ function pressure_profile_for_params_unnormalised(cfg::Config, params::Parameter
     [ pressure_profile_for_params_unnormalised_x(xx, cfg, params) for xx in x_range ]
 end
 
+function pressure_profile_for_params_normalised_x(xx::Float64, cfg::Config, params::Parameters)
+    p_vals = pressure_profile_for_params_unnormalised(cfg, params)
+    M = maximum(abs.(p_vals))
+
+    pressure_profile_for_params_unnormalised_x(xx, cfg, params) / M
+end
+
 function pressure_profile_for_params_normalised(cfg::Config, params::Parameters)
 
     p_vals = pressure_profile_for_params_unnormalised(cfg, params)
 
     M = maximum(abs.(p_vals))
 
-    p_vals / M# .+ 1
+    p_vals / M
 end
 
 ## Derivatives
