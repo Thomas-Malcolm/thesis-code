@@ -15,7 +15,7 @@
 using Bessels, Roots
 
 import Base: push!
-import Base: -
+import Base: -, +, *, /
 
 include("System.jl")
 include("Data.jl")

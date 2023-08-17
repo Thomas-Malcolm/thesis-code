@@ -2,11 +2,11 @@
 
 
 mutable struct Config
-    x0::Float64
-    ρ::Float64
-    k::Float64
-    h::Int
-    N::Int
+    x0::Float64                 # Centre of cross-section
+    ρ::Float64                  # Radius of cross-section
+    k::Float64                  # Elongation of cross-section (vertical radius)
+    h::Int                      # Mesh precision
+    N::Int                      # Eigenvalue precision
 
     x_range
     z_range
