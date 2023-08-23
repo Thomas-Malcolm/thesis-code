@@ -72,16 +72,17 @@ function CurrentDa1(xx::Float64, cfg::Config, params::Parameters)
     adns = cfg.adns
 
     x0 = cfg.x0
+    ρ = cfg.ρ
     k = cfg.k
     N = cfg.N
 
     tmpVal(n) = (1/μns[n]) * (
         (x0+1)^2 * (
-            cns[n] * besselj(2, μns[n] * (x0 + 1)) + bessely(2, μns[n] * (x0 + 1))
+            cns[n] * besselj(2, μns[n] * (x0 + ρ)) + bessely(2, μns[n] * (x0 + ρ))
         ) 
         -
         (x0-1)^2 * (
-            cns[n] * besselj(2, μns[n] * (x0 - 1)) + bessely(2, μns[n] * (x0 - 1))
+            cns[n] * besselj(2, μns[n] * (x0 - ρ)) + bessely(2, μns[n] * (x0 - ρ))
         )
     )
 
@@ -113,16 +114,17 @@ function CurrentDa2(xx::Float64, cfg::Config, params::Parameters)
     adns = cfg.adns
 
     x0 = cfg.x0
+    ρ = cfg.ρ
     k = cfg.k
     N = cfg.N
 
     tmpVal(n) = (1/μns[n]) * (
         (
-            cns[n] * besselj0(μns[n] * (x0 + 1)) + bessely0(μns[n] * (x0 + 1))
+            cns[n] * besselj0(μns[n] * (x0 + ρ)) + bessely0(μns[n] * (x0 + ρ))
         ) 
         -
         (
-            cns[n] * besselj0(μns[n] * (x0 - 1)) + bessely0(μns[n] * (x0 - 1))
+            cns[n] * besselj0(μns[n] * (x0 - ρ)) + bessely0(μns[n] * (x0 - ρ))
         )
     )
 

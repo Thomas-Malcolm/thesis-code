@@ -17,14 +17,15 @@ pressure_data = Matrix(pressure_df)
 
 # System Setup
 cfg = Config(
-    x0 = 46.0,      # cm
-    ρ = 8.5,        # cm
+    x0 = 0.46,      # m
+    ρ = 0.085,      # m
+    B0 = 0.47       # T
 )
 
 x_range = cfg.x_range
 z_range = cfg.z_range
 
-radius_vals = parse.(Float64, names(current_df)[2:end]) .+ cfg.x0 # Adjust to be centered
+radius_vals = parse.(Float64, names(current_df)[2:end]) / 100 .+ cfg.x0 # Adjust to be centered, and in metres
 
 
 
@@ -41,9 +42,17 @@ function solve_for_parameters(cdata::Data, guess::Parameters)
     function ∇f(G::AbstractVector{T}, a1v::T, a2v::T, αv::T) where T
         l_params = Parameters(a1v, a2v, αv)
 
-        G[1] = residualUnDa1(cfg, l_params, cdata)
-        G[2] = residualUnDa2(cfg, l_params, cdata)
-        G[3] = residualUnDalpha(cfg, l_params, cdata)
+        g1 = residualUnDa1(cfg, l_params, cdata)
+        println("Da1: $(g1)")
+        g2 = residualUnDa2(cfg, l_params, cdata)
+        println("Da2: $(g2)")
+        g3 = residualUnDalpha(cfg, l_params, cdata)
+        println("Da3: $(g3)")
+
+
+        G[1] = g1
+        G[2] = g2
+        G[3] = g3
     end
 
     # Optimiser initialisation
@@ -52,7 +61,7 @@ function solve_for_parameters(cdata::Data, guess::Parameters)
     set_optimizer_attribute(model, "algorithm", :LD_MMA)
     set_optimizer_attribute(model, "ftol_abs", 1e-7)
     set_optimizer_attribute(model, "xtol_rel", 1e-32)
-    set_optimizer_attribute(model, "verbosity", 1)
+    # set_optimizer_attribute(model, "verbosity", 1)
 
     register(model, :param_solve, 3, f, ∇f)
 
@@ -90,7 +99,7 @@ end
 
 # "main"
 i = 0
-guess_params = Parameters(0.1, 0.1, 0.1) # Random guess to start off
+guess_params = Parameters(-0.1, 2.0, 1.1) # Random guess to start off
 for (curr_data, pres_data) in zip(eachrow(current_data), eachrow(pressure_data))
     global i
     global guess_params

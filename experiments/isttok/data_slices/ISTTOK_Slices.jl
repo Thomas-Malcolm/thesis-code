@@ -5,7 +5,7 @@ using Plots
 
 # Current Data
 current_df = DataFrame(CSV.File("../isttok_j_profile.csv"))
-radius_vals = parse.(Float64, names(current_df)[2:end])
+radius_vals = parse.(Float64, names(current_df)[2:end]) / 100 # convert to metres
 
 current_data = Matrix(current_df)
 
@@ -22,7 +22,7 @@ for curr_data in eachrow(current_data)
     p = plot(
         radius_vals, curr_data, 
         title = "Time $(time_slice) (ms)", 
-        xlabel = "radius (mm)", ylabel = "Current Density (j / A)",
+        xlabel = "radius (m)", ylabel = "Current Density (j / A)",
         legend = false
     )
 
@@ -33,7 +33,7 @@ for curr_data in eachrow(current_data)
     p = plot(
         radius_vals, curr_data / M, 
         title = "Time $(time_slice) (ms)", 
-        xlabel = "radius (mm)", ylabel = "Current Density (normalised)",
+        xlabel = "radius (m)", ylabel = "Current Density (normalised)",
         legend = false
     )
 

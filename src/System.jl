@@ -2,11 +2,12 @@
 
 
 mutable struct Config
-    x0::Float64                 # Centre of cross-section
-    ρ::Float64                  # Radius of cross-section
-    k::Float64                  # Elongation of cross-section (vertical radius)
+    x0::Float64                 # Centre of cross-section (m)
+    ρ::Float64                  # Radius of cross-section (m)
+    k::Float64                  # Elongation of cross-section (vertical radius) (m)
     h::Int                      # Mesh precision
     N::Int                      # Eigenvalue precision
+    B0::Float64                 # On-axis magnetic field strength (T)
 
     x_range
     z_range
@@ -25,6 +26,7 @@ mutable struct Config
         k::Float64 = ρ,
         h::Int = 200,
         N::Int = 8,
+        B0::Float64 = 1.0,      # Teslas
     )
 
     new_cfg = new(
@@ -63,8 +65,9 @@ function initial_calculations(cfg::Config)
     N = cfg.N
     k = cfg.k
 
-    x0 = cfg.x0
-    ρ = cfg.ρ
+    # Radius information
+    x0 = cfg.x0     # Major radius
+    ρ = cfg.ρ       # Minor radius
 
     x_range = cfg.x_range
     z_range = cfg.z_range
@@ -76,21 +79,21 @@ function initial_calculations(cfg::Config)
     vls = cfg.vls
 
     # μns
-    zero_function(μn) = -besselj1(μn * (x0 + 1)) * ( bessely1(μn * (x0 - 1)) / besselj1(μn * (x0 - 1)) ) + bessely1(μn * (x0 + 1))
+    zero_function(μn) = -besselj1(μn * (x0 + ρ)) * ( bessely1(μn * (x0 - ρ)) / besselj1(μn * (x0 - ρ)) ) + bessely1(μn * (x0 + ρ))
 
     zeros = find_zeros(
-        zero_function, (0, 2π*N)
+        zero_function, (0, 2π*N*10) # hope this is enough
     )
 
     true_zeros = findall(
-        μn -> abs(zero_function(μn)) < 10e-10, zeros
+        μn -> abs(zero_function(μn)) < 10e-8, zeros
     )
 
     cfg.μns = zeros[splice!(true_zeros, 1:N)]
     μns = cfg.μns
 
     # cns
-    cn(μn) = -bessely1(μn * (x0 - 1)) / besselj1(μn * (x0 - 1))
+    cn(μn) = -bessely1(μn * (x0 - ρ)) / besselj1(μn * (x0 - ρ))
 
     cfg.cns = cn.(μns)
     cns = cfg.cns
@@ -109,7 +112,7 @@ function initial_calculations(cfg::Config)
         (1/μns[n]) * x * besselj0(μns[n] * x) * bessely1(μns[n] * x)
     )
 
-    cfg.adns = [ edn(x0 + 1, n) - edn(x0 - 1, n) for n in 1:N ]
+    cfg.adns = [ edn(x0 + ρ, n) - edn(x0 - ρ, n) for n in 1:N ]
 end
 
 """
@@ -124,6 +127,7 @@ function auns_for_params(cfg::Config, params::Parameters)
     μns = cfg.μns
     cns = cfg.cns
     x0 = cfg.x0
+    ρ = cfg.ρ
     N = cfg.N
     
     eun(x, n) = (1 / μns[n]) * ( 
@@ -136,6 +140,6 @@ function auns_for_params(cfg::Config, params::Parameters)
         )
     )
 
-    auns = [ (eun(x0 + 1, n) - eun(x0 - 1, n)) for n in 1:N ]
+    auns = [ (eun(x0 + ρ, n) - eun(x0 - ρ, n)) for n in 1:N ]
     auns
 end
