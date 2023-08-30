@@ -7,7 +7,8 @@ mutable struct Config
     k::Float64                  # Elongation of cross-section (vertical radius) (m)
     h::Int                      # Mesh precision
     N::Int                      # Eigenvalue precision
-    B0::Float64                 # On-axis magnetic field strength (T)
+    B0::Float64                 # On-axis magnetic field strength (T)   
+    μ0::Float64                 # free-space permeability (N * A^(-2))
 
     x_range
     z_range
@@ -26,7 +27,8 @@ mutable struct Config
         k::Float64 = ρ,
         h::Int = 200,
         N::Int = 8,
-        B0::Float64 = 1.0,      # Teslas
+        B0::Float64 = 1.0,
+        μ0::Float64 = 1.25663706212e-6
     )
 
     new_cfg = new(
@@ -35,6 +37,8 @@ mutable struct Config
         k,
         h,
         N,
+        B0,
+        μ0,
         range(x0 - ρ, x0 + ρ, length = h),
         range(-ρ, ρ, length = h),
 
