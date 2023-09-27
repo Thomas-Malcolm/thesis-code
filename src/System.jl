@@ -28,7 +28,7 @@ mutable struct Config
         h::Int = 200,
         N::Int = 8,
         B0::Float64 = 1.0,
-        μ0::Float64 = 1.25663706212e-6
+        μ0::Float64 = 4π * 1e-7 # Wesson, pg 76 
     )
 
     new_cfg = new(

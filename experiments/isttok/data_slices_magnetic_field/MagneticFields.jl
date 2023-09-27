@@ -34,7 +34,7 @@ function solve_for_parameters(cdata::Data, guess::Parameters)
 
     # Optimisation function and gradient
     function f(a1v, a2v, αv)
-        v = un_residuals(cfg, Parameters(a1v, a2v, αv), cdata)
+        v = toroidal_residuals(cfg, Parameters(a1v, a2v, αv), cdata)
         println("\tresiduals: $(v) $(round(a1v; digits = 5)), $(round(a2v; digits = 5)), $(round(αv; digits = 5))")
         v
     end
@@ -42,11 +42,11 @@ function solve_for_parameters(cdata::Data, guess::Parameters)
     function ∇f(G::AbstractVector{T}, a1v::T, a2v::T, αv::T) where T
         l_params = Parameters(a1v, a2v, αv)
 
-        g1 = residualUnDa1(cfg, l_params, cdata)
+        g1 = residualToroidalDa1(cfg, l_params, cdata)
         println("Da1: $(g1)")
-        g2 = residualUnDa2(cfg, l_params, cdata)
+        g2 = residualToroidalDa2(cfg, l_params, cdata)
         println("Da2: $(g2)")
-        g3 = residualUnDalpha(cfg, l_params, cdata)
+        g3 = residualToroidalDalpha(cfg, l_params, cdata)
         println("Da3: $(g3)")
 
 
@@ -99,7 +99,7 @@ end
 
 # "main"
 i = 0
-guess_params = Parameters(-0.1, 2.0, 1.1) # Random guess to start off
+guess_params = Parameters(-0.1, 1.0, 1.1) # Random guess to start off
 for (curr_data, pres_data) in zip(eachrow(current_data), eachrow(pressure_data))
     global i
     global guess_params

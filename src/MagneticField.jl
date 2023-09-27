@@ -39,3 +39,11 @@ function magnetic_field_for_params(cfg::Config, params::Parameters)
 
     mag_field
 end
+
+function magnetic_field_for_params_and_range(cfg::Config, params::Parameters, x_range, z_range)
+    mag_field = [
+        magnetic_field_inner_iterate(x, z, cfg, params) for z in z_range, x in x_range
+    ]
+
+    mag_field
+end

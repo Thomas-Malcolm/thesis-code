@@ -1,0 +1,4 @@
+Wang requires that x0 >> 1, otherwise with errors up to (1/x0^2). As such, have 
+tried "scaling" the reactor. Here we simply blow up the reactor to be large, and shift
+the data to be aligned with the new major radius, but leave its minor radius unchanged. 
+This seems to be an ok approximation, though further investigation needed.

@@ -33,3 +33,22 @@ function pressure_profile_for_params_normalised(cfg::Config, params::Parameters)
 
     p_vals / M
 end
+
+function toroidal_pressure_density_profile_x(xx::Float64, cfg::Config, params::Parameters)
+    β = pressure_profile_for_params_unnormalised_x(xx, cfg, params)
+
+    μ0 = cfg.μ0
+    B0 = cfg.B0
+
+    (β * B0^2) / (2 * μ)
+end
+
+function toroidal_pressure_density_profile(cfg::Config, params::Parameters)
+    x_range = cfg.x_range
+
+    [ toroidal_pressure_density_profile_x(xx, cfg, params) for xx in x_range ]
+end
+
+function toroidal_pressure_density_profile(cfg::Config, params::Parameters, x_range)
+    [ toroidal_pressure_density_profile_x(xx, cfg, params) for xx in x_range ]
+end

@@ -1,40 +1,51 @@
 include("../../../src/ACSimulation.jl")
 
+using PlotlyJS
+using DataFrames
+using CSV
 
 # Data 
 current_df = DataFrame(CSV.File("../isttok_j_profile.csv"))
-pressure_df = DataFrame(CSV.File("../isttok_p_profile.csv"))
 
-current_data = Matrix(current_df)
-pressure_data = Matrix(pressure_df)
+curr_data = Matrix(current_df)[1,:] # Get first time slice
+
+
+
 
 # System Setup
 cfg = Config(
     x0 = 0.46,      # m
     ρ = 0.085,      # m
+    B0 = 0.47       # T (Teslas)
 )
 
-val_h = 200
+val_h = 1000 # precision of mesh for heatmap
 
 # Variations
-a1_vals = range(-5.0, 5.0, length = val_h)
-a2_vals = range(-20.0, 20.0, length = val_h)
-a3_vals = range(-10.0, 10.0, length = val_h)
+a1_vals = range(-50.0, 50.0, length = val_h)
+a2_vals = range(-50.0, 50.0, length = val_h)
+a3_vals = range(-50.0, 50.0, length = val_h)
 
-a1_expected = -0.04531
-a2_expected = -1.0808
-a3_expected = 2.1653
+a1_expected = -0.05
+a2_expected = -1.1
+a3_expected = 2.17
+
+# Data Collation
+
+radius_vals = parse.(Float64, names(current_df)[2:end]) / 100 .+ cfg.x0 # Adjust to be centered, and in metres
+curr_data = curr_data[2:end]
+curr_d = Data(radius_vals, curr_data)
 
 
 # Varying a1 and a2, with a fixed α
 println("a1, a2, fixed α")
 
 heat_vals = [
-    sum_residuals(a1v, a2v, a3_expected)
+    toroidal_residuals(cfg, Parameters(a1v, a2v, a3_expected), curr_d)
     for a2v in a2_vals, a1v in a1_vals
 ]
 
-hm1 = plot([
+hm1 = plot([    
         heatmap(
             x = a1_vals,
             y = a2_vals,
@@ -47,20 +58,20 @@ hm1 = plot([
         showlegend = false
     )
 )
-savefig(hm1, "heat-a1-a2-large.pdf")
+savefig(hm1, "heat-a1-a2-gigantic.pdf")
 
 # Varying a1 and α, with a fixed a2
-println("a1, a2, fixed α")
+println("a1, a3, fixed α")
 
 heat_vals = [
-    sum_residuals(a1v, a2_expected, αv)
-    for αv in x3_vals, a1v in x1_vals
+    toroidal_residuals(cfg, Parameters(a1v, a2_expected, αv), curr_d)
+    for αv in a3_vals, a1v in a1_vals
 ]
 
 hm2 = plot([
         heatmap(
-            x = x1_vals,
-            y = x3_vals,
+            x = a1_vals,
+            y = a3_vals,
             z = heat_vals,
         ),
     ],
@@ -71,23 +82,21 @@ hm2 = plot([
     )
 )
 
-savefig(hm2, "heat-a1-a3-large.pdf")
+savefig(hm2, "heat-a1-a3-gigantic.pdf")
 
 # Varying a2 and α, with a fixed a1
 println("a2, α, fixed a1")
 heat_vals = [
-    sum_residuals(a1_expected, a2v, αv)
-    for αv in x3_vals, a2v in x2_vals
+    toroidal_residuals(cfg, Parameters(a1_expected, a2v, αv), curr_d)
+    for αv in a3_vals, a2v in a2_vals
 ]
 
 hm3 = plot([
         heatmap(
-            x = x2_vals,
-            y = x3_vals,
+            x = a2_vals,
+            y = a3_vals,
             z = heat_vals,
         ),
-        scatter(x = df1.x, y = df1.y),
-        scatter(x = df2.x, y = df2.y)
     ],
     Layout(
         xaxis_title = "a2",
@@ -96,4 +105,4 @@ hm3 = plot([
     )
 )
 
-savefig(hm3, "heat-a2-a3-large.pdf")
+savefig(hm3, "heat-a2-a3-gigantic.pdf")

@@ -1,3 +1,5 @@
+
+
 function current_profile_for_params_unnormalised_x(xx::Float64, cfg::Config, params::Parameters)
     a1 = params.a1
     a2 = params.a2
@@ -35,7 +37,6 @@ function current_profile_for_params_unnormalised(cfg::Config, params::Parameters
 end
 
 function current_profile_for_params_normalised_x(xx::Float64, cfg::Config, params::Parameters)
-
     M = maximum_current_for_params(cfg, params)
 
     current_profile_for_params_unnormalised_x(xx, cfg, params) / M
@@ -53,6 +54,22 @@ function maximum_current_for_params(cfg::Config, params::Parameters)
     curr_vals = current_profile_for_params_unnormalised(cfg, params)
 
     maximum(abs.(curr_vals))
+end
+
+function toroidal_current_density_profile_x(xx::Float64, cfg::Config, params::Parameters)
+    jϕ = current_profile_for_params_unnormalised_x(xx, cfg, params)
+
+    μ0 = cfg.μ0
+    B0 = cfg.B0
+    a = cfg.ρ
+
+    (jϕ * B0) / (μ0 * a)
+end
+
+function toroidal_current_density_profile(cfg::Config, params::Parameters)
+    x_range = cfg.x_range
+
+    [ toroidal_current_density_profile_x(xx, cfg, params) for xx in x_range ]
 end
 
 
