@@ -52,3 +52,10 @@ end
 function toroidal_pressure_density_profile(cfg::Config, params::Parameters, x_range)
     [ toroidal_pressure_density_profile_x(xx, cfg, params) for xx in x_range ]
 end
+
+
+# Pressure Derivatives
+
+"""
+Partial derivative of p(x,z) with respect to a1
+"""

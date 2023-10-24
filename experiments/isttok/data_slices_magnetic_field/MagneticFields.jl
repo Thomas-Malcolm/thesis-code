@@ -111,8 +111,8 @@ for (curr_data, pres_data) in zip(eachrow(current_data), eachrow(pressure_data))
     curr_data = curr_data[2:end]
     pres_data = pres_data[2:end]
 
-    curr_data_norm = curr_data / maximum(curr_data)
-    pres_data_norm = pres_data / maximum(pres_data)
+    curr_data_norm = curr_data / maximum(abs.(curr_data))
+    pres_data_norm = pres_data / maximum(abs.(pres_data))
 
     ## `Data` structure 
     curr_d = Data(radius_vals, curr_data)
@@ -124,20 +124,20 @@ for (curr_data, pres_data) in zip(eachrow(current_data), eachrow(pressure_data))
     # Plotting
     mag_field = magnetic_field_for_params(cfg, solved_params)
     p = contour(x_range, z_range, mag_field, xlims = (cfg.x0 - cfg.ρ, cfg.x0 + cfg.ρ), ylims = (-cfg.k, cfg.k))
-    plot!(radius_vals, curr_data_norm .* cfg.k, label = "Current")
-    plot!(radius_vals, pres_data_norm .* cfg.k, label = "Pressure")
+    plot!(radius_vals, curr_data_norm .* cfg.k, label = "j (Data)")
+    plot!(radius_vals, pres_data_norm .* cfg.k, label = "p (Data)")
     
     title!("Time $(time_slice)")
-    xlabel!("x (cm)")
+    xlabel!("Major Radius (m)")
     savefig(p, "graphs/slice_$(i).pdf")
 
     ## Comparison with simulated current / pressure
-    p1 = plot(radius_vals, curr_data_norm, label = "Ip (Data)")
-    plot!(radius_vals, pres_data_norm, label = "P (Data)")
+    p1 = plot(radius_vals, curr_data_norm, label = "j (Data)")
+    plot!(radius_vals, pres_data_norm, label = "p (Data)")
     sim_curr = current_profile_for_params_normalised(cfg, solved_params) # / firstM
     sim_pres = pressure_profile_for_params_normalised(cfg, solved_params)
-    p2 = plot(x_range, sim_curr, label = "Ip (Sim)")
-    plot!(x_range, sim_pres, label = "P (Sim)")
+    p2 = plot(x_range, sim_curr, label = "j (Sim)")
+    plot!(x_range, sim_pres, label = "p (Sim)")
 
     p = plot(
         p1, p2, layout = (2,1)

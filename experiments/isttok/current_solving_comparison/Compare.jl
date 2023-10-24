@@ -115,14 +115,14 @@ for (curr_data, pres_data) in zip(eachrow(current_data), eachrow(pressure_data))
     solved_params = solve_for_parameters(curr_d, guess_params)
 
     ## Comparison with simulated current / pressure
-    # p1 = plot(radius_vals, curr_data_norm, label = "Ip (Data)")
-    p1 = plot(radius_vals, curr_data, label = "Ip (Data)")
+    # p1 = plot(radius_vals, curr_data_norm, label = "j (Data)")
+    p1 = plot(radius_vals, curr_data, label = "j (Data)", title = "Current Density Profile Comparison")
 
     sim_curr = toroidal_current_density_profile(cfg, solved_params) 
-    p2 = plot(x_range, sim_curr, label = "Ip (Sim)")
+    p2 = plot(x_range, sim_curr, label = "j (Sim)", xlabel = "Major Radius (m)", ylabel = "Current Density (A / m^2)")
 
     p = plot(
-        p1, p2, layout = (2,1)
+        p1, p2, layout = (2,1), 
     )
     
     savefig(p, "graphs/comparison_$(i).pdf")

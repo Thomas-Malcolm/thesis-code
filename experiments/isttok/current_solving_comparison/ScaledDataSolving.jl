@@ -10,9 +10,15 @@ using NLopt
 
 # Data
 current_df = DataFrame(CSV.File("../isttok_j_profile_slice_1_carved.csv"))
+pressure_df = DataFrame(CSV.File("../isttok_p_profile_slice_1_carved.csv"))
 radius_vals = parse.(Float64, names(current_df)) / 100 
 
+println(current_df)
+println()
+println(pressure_df)
+
 c_data = Float64.(Matrix(current_df)[1,:])
+p_data = Float64.(Matrix(pressure_df)[1,:])
 
 # System Setup
 cfg = Config(
@@ -32,7 +38,7 @@ B0 = cfg.B0
 μ0 = cfg.μ0
 a = cfg.ρ
 
-scaled_current = c_data .* ((μ0 * a) / B0)
+scaled_current = c_data # c_data .* ((μ0 * a) / B0)
 
 curr_d = Data(radius_vals, scaled_current)
 
@@ -106,14 +112,31 @@ end
 first_guess = Parameters(-5, 5.0, 20.0)
 
 params = solve_for_parameters(curr_d, first_guess)
-p1 = plot(radius_vals, scaled_current, label = "Ip (Data)")
+p1 = plot(radius_vals, scaled_current / maximum(abs.(scaled_current)), label = "j (Data)", title = "Density Profile Comparisons")
+plot!(radius_vals, p_data / maximum(abs.(p_data)), label = "p (Data)")
 
 # sim_curr = current_profile_for_params_unnormalised(cfg, params)
-sim_curr = [ current_profile_for_params_unnormalised_x(xx, cfg, params) for xx in radius_vals ]
-p2 = plot(radius_vals, sim_curr, label = "Ip (Sim)")
+sim_curr = [ current_profile_for_params_normalised_x(xx, cfg, params) for xx in radius_vals ]
+sim_pres = [ pressure_profile_for_params_normalised_x(xx, cfg, params) for xx in radius_vals ]
+p2 = plot(radius_vals, sim_curr, label = "j (Sim)", xlabel = "Major Radius (m)")
+plot!(radius_vals, sim_pres, label = "p (Sim)")
 
 p = plot(
     p1, p2, layout = (2,1)
 )
 
-savefig(p, "graphs/comparison_reverse_scale_0.pdf") 
+savefig(p, "graphs/comparison_edited_0_pressure_included.pdf") 
+
+
+curr_data_norm = c_data / maximum(abs.(c_data))
+pres_data_norm = p_data / maximum(abs.(p_data))
+
+mag_field = magnetic_field_for_params(cfg, params)
+p = contour(x_range, z_range, mag_field, xlims = (cfg.x0 - cfg.ρ, cfg.x0 + cfg.ρ), ylims = (-cfg.k, cfg.k))
+plot!(radius_vals, curr_data_norm .* cfg.k, label = "j (Data)")
+plot!(radius_vals, pres_data_norm .* cfg.k, label = "p (Data)")
+
+title!("Time 30.5267")
+xlabel!("Major Radius (m)")
+savefig(p, "graphs/mag-field-edited-data-0.pdf") 
+
